@@ -1,14 +1,17 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import random
+import time
 
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
            'dog', 'frog', 'horse', 'ship', 'truck')
-
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
@@ -17,7 +20,8 @@ transform = transforms.Compose(
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 
-# Need to flatten data for kNN
+
+# Need to flatten data for KNN
 def flatten_loader(loader):
     data = []
     labels = []
@@ -33,41 +37,69 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=1000, shuffle=Fal
 train_data, train_labels = flatten_loader(train_loader)
 test_data, test_labels = flatten_loader(test_loader)
 
-def knn_predictor(train_data, train_labels, test_data, k=3):
-    preds = []
-    for i in tqdm(range(test_data.size(0))):
-        # euclidean distances
-        distances = torch.norm(train_data - test_data[i], dim=1)
-        knn_indices = distances.topk(k, largest=False).indices
-        knn_labels = train_labels[knn_indices]
-        pred = torch.mode(knn_labels).values.item()
-        preds.append(pred)
-    return preds
 
+# def knn_predictor(train_data, train_labels, test_data, k=3):
+#     preds = []
+#     for i in tqdm(range(test_data.size(0))):
+#         # euclidean distances
+#         distances = torch.norm(train_data - test_data[i], dim=1)
+#         indices = distances.topk(k, largest=False).indices
+#         labels = train_labels[indices]
+#         pred = torch.mode(labels).values.item()
+#         preds.append(pred)
+#     return preds
+
+
+def knn_optimization(train_data, train_labels, test_data, k):
+    # vectorized algorithm
+    dists = torch.cdist(test_data, train_data, p=2)
+    knn_indices = dists.topk(k, largest=False).indices
+    knn_labels = train_labels[knn_indices]
+    preds = torch.mode(knn_labels, dim=1).values
+    return preds.tolist()
 
 def imshow(img):
-    img = img / 2 + 0.5     # de-normalize
+    img = img / 2 + 0.5  # de-normalize
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-def main():
-    k = 3
+def time_inference_knn(train_data, train_labels, test_data, k=3, num_samples=100):
+    indices = random.sample(range(len(test_data)), num_samples)
+    selected_test = test_data[indices]
+
+    start_time = time.time()
+
+    preds = knn_optimization(train_data, train_labels, selected_test, k=k)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+    avg_time = total_time / num_samples
+
+    print(f"KNN classified {num_samples} images in {total_time:.4f} seconds.")
+    print(f"Average time per image: {avg_time:.6f} seconds.")
+
+    return total_time, avg_time
+
+def run_knn(train_new, k):
     print("Running KNN...")
-    predictions = knn_predictor(train_data, train_labels, test_data, k=k)
+    model_path = 'cifar_KNN_model.npy'
+
+    start_time = time.time()
+
+    if not train_new and os.path.exists(model_path):
+        print("Loading saved KNN model...")
+        predictions = np.load(model_path)
+    else:
+        print("Training KNN from scratch...")
+        predictions = knn_optimization(train_data, train_labels, test_data, k)
+        np.save(model_path, np.array(predictions))
+
+    end_time = time.time()
+    time_taken = end_time - start_time
+
+
     accuracy = np.mean(np.array(predictions) == test_labels.numpy())
     print(f"\nKNN Accuracy with k={k}: {accuracy * 100:.2f}%")
 
-    # Visualize a batch of test images with predicted labels
-    sample_loader = torch.utils.data.DataLoader(test_set, batch_size=4, shuffle=False)
-    data_iter = iter(sample_loader)
-    images, labels = next(data_iter)
-
-    imshow(torchvision.utils.make_grid(images))
-
-    print("GroundTruth: ", ' '.join(f'{classes[labels[j]]}' for j in range(4)))
-    print("Predicted:   ", ' '.join(f'{classes[predictions[j]]}' for j in range(4)))
-
-
-if __name__ == '__main__':
-    main()
+    return time_taken, accuracy, train_data, train_labels, test_data, test_labels
