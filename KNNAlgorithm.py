@@ -52,9 +52,13 @@ test_data, test_labels = flatten_loader(test_loader)
 
 def knn_optimization(train_data, train_labels, test_data, k):
     # vectorized algorithm
+    # calculates euclidean distances of data
     dists = torch.cdist(test_data, train_data, p=2)
+    # finds indices of the k closest data points for each test point
     knn_indices = dists.topk(k, largest=False).indices
+    # retrieves data of those neighbors
     knn_labels = train_labels[knn_indices]
+    # generates predictions
     preds = torch.mode(knn_labels, dim=1).values
     return preds.tolist()
 
