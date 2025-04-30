@@ -37,19 +37,6 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=1000, shuffle=Fal
 train_data, train_labels = flatten_loader(train_loader)
 test_data, test_labels = flatten_loader(test_loader)
 
-
-# def knn_predictor(train_data, train_labels, test_data, k=3):
-#     preds = []
-#     for i in tqdm(range(test_data.size(0))):
-#         # euclidean distances
-#         distances = torch.norm(train_data - test_data[i], dim=1)
-#         indices = distances.topk(k, largest=False).indices
-#         labels = train_labels[indices]
-#         pred = torch.mode(labels).values.item()
-#         preds.append(pred)
-#     return preds
-
-
 def knn_optimization(train_data, train_labels, test_data, k):
     # vectorized algorithm
     # calculates euclidean distances of data
