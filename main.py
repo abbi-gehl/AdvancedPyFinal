@@ -7,6 +7,7 @@ import random
 
 
 def gen_images(net, device, train_data, train_labels, test_data, test_labels, k):
+    """ image function that generates and plots 4 images and tests the classification of both models """
     classes = ('plane', 'car', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')  # CIFAR-10 classes
 
@@ -62,6 +63,7 @@ def gen_images(net, device, train_data, train_labels, test_data, test_labels, k)
 
 
 def main():
+    """ Main function that runs the algorithms and plots the results"""
     k=5
     train_new = False
 
@@ -110,7 +112,6 @@ def main():
         plt.show()
         print("Generating images...")
         gen_images(net, device, train_data, train_labels, test_data, test_labels, k)
-
 
 
 

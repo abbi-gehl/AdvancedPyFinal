@@ -1,15 +1,13 @@
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from tqdm import tqdm
 import random
 import time
 
-
+"""setting up CIFAR10"""
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
            'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -23,6 +21,7 @@ test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=Tru
 
 # Need to flatten data for KNN
 def flatten_loader(loader):
+    """Flattens data from loader"""
     data = []
     labels = []
     for images, lbls in loader:
@@ -38,6 +37,7 @@ train_data, train_labels = flatten_loader(train_loader)
 test_data, test_labels = flatten_loader(test_loader)
 
 def knn_optimization(train_data, train_labels, test_data, k):
+    """KNN classification algorithm maps images to known classification"""
     # vectorized algorithm
     # calculates euclidean distances of data
     dists = torch.cdist(test_data, train_data, p=2)
@@ -50,12 +50,14 @@ def knn_optimization(train_data, train_labels, test_data, k):
     return preds.tolist()
 
 def imshow(img):
+    """plot image"""
     img = img / 2 + 0.5  # de-normalize
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
 def time_inference_knn(train_data, train_labels, test_data, k=3, num_samples=100):
+    """test classification for KNN num_samples number of times and returns average time per image and total time"""
     indices = random.sample(range(len(test_data)), num_samples)
     selected_test = test_data[indices]
 
@@ -73,6 +75,8 @@ def time_inference_knn(train_data, train_labels, test_data, k=3, num_samples=100
     return total_time, avg_time
 
 def run_knn(train_new, k):
+    """Runs the KNN algorithm and returns the data, the time taken and accuracy of the model.
+    Saves the model to a file for future use."""
     print("Running KNN...")
     model_path = 'cifar_KNN_model.npy'
 

@@ -34,13 +34,16 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 
 def imshow(img):
+    """plot image"""
     img = img / 2 + 0.5     # de normalize
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
 class Net(nn.Module):
+    """CNN model taken from tutorial"""
     def __init__(self):
+        """initialize model"""
         super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
@@ -50,6 +53,7 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x):
+        """forward pass"""
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1) # flatten all dimensions except batch
@@ -59,6 +63,7 @@ class Net(nn.Module):
         return x
 
 def time_inference_cnn(net, device, testloader, num_samples=100):
+    """test classification for CNN num_samples number of times and returns average time per image and total time"""
     net.eval()
 
     images_list = []
@@ -92,6 +97,8 @@ def time_inference_cnn(net, device, testloader, num_samples=100):
 
 
 def run_torch_tutorial(train_new):
+    """ Generates the CNN model from the pytorch tutorial and returns the data, time taken and accuracy of the model.
+    Saves to file for future use."""
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     net = Net()
     net.to(device)
@@ -111,7 +118,7 @@ def run_torch_tutorial(train_new):
 
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-
+        """running model twice"""
         for epoch in range(2):
             running_loss = 0.0
             for i, data in enumerate(trainloader, 0):
