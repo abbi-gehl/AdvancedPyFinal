@@ -110,6 +110,7 @@ def run_torch_tutorial(train_new):
 
     # Check if saved model exists
     if not train_new and os.path.exists('cifar_CNN_net.pth'):
+        """look before we leap"""
         net.load_state_dict(torch.load('cifar_CNN_net.pth'))
         net.eval()  # set to evaluation mode
         print("Loaded saved model.")

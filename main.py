@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import random
-
+"""main.py file to run the different image recognitions and compare them"""
 
 def gen_images(net, device, train_data, train_labels, test_data, test_labels, k):
     """ image function that generates and plots 4 images and tests the classification of both models """

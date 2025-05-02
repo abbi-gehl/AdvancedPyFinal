@@ -6,6 +6,7 @@ import torchvision
 import torchvision.transforms as transforms
 import random
 import time
+"""KNN file to classify the images to their known labels and classify accordingly for new images using KNN."""
 
 """setting up CIFAR10"""
 classes = ('plane', 'car', 'bird', 'cat', 'deer',
@@ -83,6 +84,7 @@ def run_knn(train_new, k):
     start_time = time.time()
 
     if not train_new and os.path.exists(model_path):
+        """look before we leap"""
         print("Loading saved KNN model...")
         predictions = np.load(model_path)
     else:
