@@ -66,6 +66,19 @@ def main():
     """ Main function that runs the algorithms and plots the results"""
     k=5
     train_new = False
+    while True:
+        user_in = input("Would you like to use a saved model (1), or train new models (2)? (1/2): ")
+        if user_in == '1':
+            print("Loading saved models, this may take a while...")
+            train_new = False
+            break
+        elif user_in == '2':
+            print("Generating new models, this may take a while...")
+            train_new = True
+            break
+        else:
+            print("Invalid input. Please enter 1 or 2.")
+            continue
 
     torch_time, torch_accuracy, net, device = TorchTutorialModel.run_torch_tutorial(train_new)
     knn_time, knn_accuracy, train_data, train_labels, test_data, test_labels = KNNAlgorithm.run_knn(train_new, k)
@@ -77,6 +90,9 @@ def main():
     times = [torch_time, knn_time]
     accuracies = [torch_accuracy, knn_accuracy*100]
     inference_times = [cnn_avg, knn_avg]
+
+
+
     if train_new:
         fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
